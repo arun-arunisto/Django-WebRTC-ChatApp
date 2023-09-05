@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %} Chat Room {% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-8 mb-3 mb-sm-0">
+        <div class="card">
+            <div class="card-body mb-3">
+                <video class="img-fluid" autoplay playsinline></video>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <button class="btn btn-primary">Audio Mute</button>
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-primary">Video Off</button>
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-primary">Share Screen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">CHAT</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-sm-9 mb-3 mb-sm-0">
+                            <input type="text" class="form-control" name="message" placeholder="Chat..">
+                        </div>
+                        <div class="col-sm-3">
+                            <button type="submit" class="btn btn-primary">Chat</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

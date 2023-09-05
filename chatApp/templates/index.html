@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %} Home Page {% endblock %}
+{% block content %}
+<div class="card" style="border: none;">
+    <div class="card-body" style="width: 50%; margin: 0 auto;">
+        <form action="chat_room/" method="post">
+            <div class="mb-3">
+                {% csrf_token %}
+                <label class="form-label" for="username"></label>
+                <input type="text" class="form-control" name="username" placeholder="username" id="username">
+            </div>
+            <div class="mb-3">
+                <button type="submit" id="btn-join" class="btn btn-primary">Connect</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
