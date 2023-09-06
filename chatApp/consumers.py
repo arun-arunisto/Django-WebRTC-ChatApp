@@ -25,6 +25,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = receive_dict['message']
         action = receive_dict['action']
 
+        if (action == 'new-offer') or (action == 'new-answer'):
+            receiver_channel_name = receive_dict['message']['receiver_channel_name']
+            receive_dict['message']['receiver_channel_name'] = self.channel_name
+
+            await self.channel_layer.send(
+                receiver_channel_name, {
+                    "type": "send.sdp",
+                    "receive_dict": receive_dict
+                }
+            )
         #when a new peer is connected other clients have no idea about
         #it connected so first we add a channel name as a key value to
         #others let know

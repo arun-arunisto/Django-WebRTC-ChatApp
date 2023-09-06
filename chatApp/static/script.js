@@ -21,6 +21,12 @@ function webSocketOnMessage(event) {
         createOfferer(peerUsername, receiver_channel_name);
         return;
     }
+
+    if(action == 'new-offer') {
+        var offer = parsedData['message']['sdp'];
+        createAnswerer(offer, peerUsername, receiver_channel_name);
+        return;
+    }
 }
 
 console.log(username);
@@ -94,6 +100,56 @@ function createOfferer(peerUsername, receiver_channel_name) {
         console.log('Connection Opened!');
     });
     dc.addEventListener('message', dcOnMessage);
+
+    //creating remote video for remote peer
+    var remoteVideo = createVideo(peerUsername);
+
+    //creating audio for remote peer
+    setOnTrack(peer, remoteVideo);
+
+    mapPeers[peerUsername] = [peer, dc];
+
+    peer.addEventListener('iceconnectionstatechange', () => {
+        var iceConnectionState = peer.iceConnectionState;
+
+        if (iceConnectionState === 'failed' || iceConnectionState === 'disconnected' || iceConnectionState === 'closed') {
+            delete mapPeers[peerUsername];
+
+            if (iceConnectionState != 'closed') {
+                peer.close();
+            }
+
+            removeVideo(remoteVideo);
+        }
+    });
+
+    peer.addEventListener('icecandidate', (event) => {
+        if(event.candidate) {
+            console.log('New ice candidate: ',JSON.stringify(peer.localDescription));
+
+            return;
+        }
+
+        sendSignal('new-offer', {
+            'sdp': peer.localDescription,
+            'receiver_channel_name': receiver_channel_name
+        });
+    });
+
+    peer.createOffer()
+        .then(o => peer.setLocalDescription(o))
+        .then(() => {
+            console.log('Local description set successfully.');
+        });
+}
+
+function createAnswerer(offer, peerUsername, receiver_channel_name){
+//it will only connect in same network it will not connect different n/w
+    //that's why we initialize null value
+    var peer = new RTCPeerConnection(null);
+
+    //adding local audio/video to peer
+    addLocalTracks(peer);
 
     //creating remote video for remote peer
     var remoteVideo = createVideo(peerUsername);
