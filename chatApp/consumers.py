@@ -23,17 +23,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         receive_dict = json.loads(text_data)
         message = receive_dict['message']
+        action = receive_dict['action']
+
+        #when a new peer is connected other clients have no idea about
+        #it connected so first we add a channel name as a key value to
+        #others let know
+        receive_dict['message']['receiver_channel_name'] = self.channel_name
 
         await self.channel_layer.group_send(
             self.room_group_name, {
-                "type": "send.message",
-                "message": message
+                "type": "send.sdp",
+                "receive_dict": receive_dict
             }
         )
 
-    async def send_message(self, event):
-        message = event['message']
+    async def send_sdp(self, event):
+        receive_dict = event['receive_dict']
 
-        await self.send(text_data=json.dumps({
-            'message':message
-        }))
+        await self.send(text_data=json.dumps(receive_dict))
