@@ -27,6 +27,13 @@ function webSocketOnMessage(event) {
         createAnswerer(offer, peerUsername, receiver_channel_name);
         return;
     }
+
+    if(action == 'new-answer') {
+        var answer = parsedData['message']['sdp'];
+        var peer = mapPeers[peerUsername][0];
+        peer.setRemoteDescription(answer);
+        return;
+    }
 }
 
 console.log(username);
@@ -62,12 +69,41 @@ const constraints = {
 };
 
 const localVideo = document.querySelector('#local-video');
+const btnToggleAudio = document.querySelector("#btn-toggle-audio");
+const btnToggleVideo = document.querySelector("#btn-toggle-video")
 
 var userMedia = navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
         localStream = stream;
         localVideo.srcObject = localStream;
         localVideo.muted = true;
+
+        //for audio mute and video off
+        var audioTracks = stream.getAudioTracks();
+        var videoTracks = stream.getVideoTracks();
+
+        audioTracks[0].enabled = true;
+        videoTracks[0].enabled = true;
+
+        btnToggleAudio.addEventListener('click', () => {
+            audioTracks[0].enabled = !audioTracks[0].enabled;
+
+            if(audioTracks[0].enabled){
+                btnToggleAudio.innerHTML = 'Audio Mute';
+                return;
+            }
+            btnToggleAudio.innerHTML = 'Audio Unmute';
+        });
+
+        btnToggleVideo.addEventListener('click', () => {
+            videoTracks[0].enabled = !videoTracks[0].enabled;
+
+            if(videoTracks[0].enabled){
+                btnToggleVideo.innerHTML = 'Video Off';
+                return;
+            }
+            btnToggleVideo.innerHTML = 'Video On';
+        });
     })
     .catch(error => {
         console.log("Error: ", error);
@@ -157,7 +193,15 @@ function createAnswerer(offer, peerUsername, receiver_channel_name){
     //creating audio for remote peer
     setOnTrack(peer, remoteVideo);
 
-    mapPeers[peerUsername] = [peer, dc];
+    peer.addEventListener('datachannel', e => {
+        peer.dc = e.channel;
+        peer.dc.addEventListener('open', () => {
+            console.log("Connection Opened!");
+        });
+        peer.dc.addEventListener('message', dcOnMessage);
+
+        mapPeers[peerUsername] = [peer, peer.dc];
+    });
 
     peer.addEventListener('iceconnectionstatechange', () => {
         var iceConnectionState = peer.iceConnectionState;
@@ -180,17 +224,24 @@ function createAnswerer(offer, peerUsername, receiver_channel_name){
             return;
         }
 
-        sendSignal('new-offer', {
+        sendSignal('new-answer', {
             'sdp': peer.localDescription,
             'receiver_channel_name': receiver_channel_name
         });
     });
 
-    peer.createOffer()
-        .then(o => peer.setLocalDescription(o))
+    peer.setRemoteDescription(offer)
         .then(() => {
-            console.log('Local description set successfully.');
-        });
+            console.log("Remote Description set sucessfully for %s.",peerUsername);
+
+            return peer.createAnswer();
+        })
+        .then(a => {
+            console.log("Answer Created!");
+
+            peer.setLocalDescription(a);
+        })
+
 }
 
 //function to add local tracks to peer

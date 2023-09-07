@@ -6,18 +6,20 @@
         <div class="card">
             <div class="card-body mb-3">
                 <div class="row">
-                    <div class="col-sm-6" id="video-container">
-                      <video id="local-video" class="img-fluid" autoplay playsinline style="width: 300px;height: 300px;"></video>
+                    <div class="col-sm-6">
+                        <div id="video-container">
+                          <div><video id="local-video" class="img-fluid" style="width: 300px;height: 300px;" autoplay playsInline></video></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-4 mb-3">
-                        <button class="btn btn-primary">Audio Mute</button>
+                        <button class="btn btn-primary" id="btn-toggle-audio">Audio Mute</button>
                     </div>
                     <div class="col-sm-4">
-                        <button class="btn btn-primary">Video Off</button>
+                        <button class="btn btn-primary" id="btn-toggle-video">Video Off</button>
                     </div>
                     <div class="col-sm-4">
                         <button class="btn btn-primary">Share Screen</button>
