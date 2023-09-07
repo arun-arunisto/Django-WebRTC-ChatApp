@@ -35,6 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "receive_dict": receive_dict
                 }
             )
+
+            return
         #when a new peer is connected other clients have no idea about
         #it connected so first we add a channel name as a key value to
         #others let know
